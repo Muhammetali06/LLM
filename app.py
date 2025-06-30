@@ -10,6 +10,7 @@ import webbrowser
 
 # OpenAI API anahtarını ortam değişkeninden al
 openai.api_key = os.environ.get("OPENAI_API_KEY")
+print("OPENAI API KEY:", openai.api_key)
 
 app = Flask(__name__)
 
