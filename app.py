@@ -1,55 +1,17 @@
+# app.py (Render uyumlu, ses çalma olmadan, CORS dahil)
 from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS
 import openai
-from gtts import gTTS
-from pydub import AudioSegment
-import os
 from datetime import datetime
 import random
+import os
 
-# OpenAI API anahtarını environment'tan al
-openai.api_key = os.getenv("OPENAI_API_KEY")
+openai.api_key = os.getenv("OPENAI_API_KEY", "sk-...")  # Render'da gizli key kullan
 
 app = Flask(__name__)
+CORS(app)
 
-def speed_swifter(sound, speed=1.0):
-    sound_with_altered_frame_rate = sound._spawn(
-        sound.raw_data,
-        overrides={"frame_rate": int(sound.frame_rate * speed)}
-    )
-    return sound_with_altered_frame_rate
-
-def speeding():
-    in_path = 'answer.mp3'
-    ex_path = 'audio-4065.mp3'
-    sound = AudioSegment.from_file(in_path)
-    faster_sound = speed_swifter(sound, 1.1)
-    faster_sound.export(ex_path, format="mp3")
-
-def speak(text):
-    tts = gTTS(text=text, lang="tr", slow=False)
-    file = "answer.mp3"
-    tts.save(file)
-    speeding()
-    os.system("start audio-4065.mp3")  # Windows için
-    os.remove(file)
-    os.remove("audio-4065.mp3")
-
-def openai_response(prompt):
-    try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": "Türkçe olarak kısa ve anlaşılır cevaplar ver."},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=150,
-            temperature=0.7,
-        )
-        answer = response['choices'][0]['message']['content'].strip()
-        return answer
-    except Exception as e:
-        print("OpenAI API Hatası:", e)
-        return "Üzgünüm, şu anda cevap veremiyorum."
+# Mesajlara özel komutlar
 
 def check_custom_commands(voice):
     if "merhaba" in voice:
@@ -74,15 +36,33 @@ def check_custom_commands(voice):
         return days.get(today_eng, "Bugünün gününü bilemedim.")
     elif "saat kaç" in voice:
         saat = datetime.now().strftime("%H:%M")
-        cevaplar = ["Saat şu an: ", "Hemen bakıyorum: "]
-        return random.choice(cevaplar) + saat
+        return random.choice(["Saat şu an: ", "Hemen bakıyorum: "]) + saat
     else:
         return None
 
+# OpenAI'dan cevap alma fonksiyonu
+
+def openai_response(prompt):
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4o",  # veya "gpt-3.5-turbo"
+            messages=[
+                {"role": "system", "content": "Türkçe olarak kısa ve anlaşılır cevaplar ver."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=150
+        )
+        return response['choices'][0]['message']['content'].strip()
+    except Exception as e:
+        print("API hatası:", e)
+        return "Üzgünüm, şu anda cevap veremiyorum."
+
+# Anasayfa
 @app.route("/")
 def index():
     return render_template("index.html")
 
+# Chat endpoint
 @app.route("/chat", methods=["POST"])
 def chat():
     data = request.get_json()
@@ -90,9 +70,9 @@ def chat():
     response = check_custom_commands(message)
     if response is None:
         response = openai_response(message)
-    # speak(response)  # Render ortamında ses çalmak istemiyorsan kapalı bırak
+    print("Cevap:", response)  # DEBUG
     return jsonify({"reply": response})
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(debug=False, host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port)
