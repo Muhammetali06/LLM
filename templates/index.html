@@ -84,13 +84,15 @@
     <div class="messages" id="chatbox">
       <div class="message bot">Merhaba! Size nasıl yardımcı olabilirim?</div>
     </div>
-    <form onsubmit="sendMessage(event)">
+    <form id="chatForm">
       <input type="text" id="userInput" placeholder="Mesajınızı yazın..." required>
       <input type="submit" value="Gönder">
     </form>
   </div>
 
   <script>
+    document.getElementById("chatForm").addEventListener("submit", sendMessage);
+
     function sendMessage(event) {
       event.preventDefault();
       const input = document.getElementById('userInput');
@@ -98,14 +100,22 @@
       input.value = '';
 
       addMessage(message, 'user');
+
       fetch('/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: message })
       })
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error("Sunucu hatası!");
+        return res.json();
+      })
       .then(data => {
         addMessage(data.reply, 'bot');
+      })
+      .catch(err => {
+        console.error("Hata:", err);
+        addMessage("Bir hata oluştu: " + err.message, 'bot');
       });
     }
 
@@ -120,4 +130,3 @@
   </script>
 </body>
 </html>
-
