@@ -8,8 +8,8 @@ from datetime import datetime
 import random
 import webbrowser
 
-# OpenAI API anahtarını buraya koy
-openai.api_key = "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"
+# OpenAI API anahtarını ortam değişkeninden al
+openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 app = Flask(__name__)
 
@@ -97,6 +97,5 @@ def chat():
     return jsonify({"reply": response})
 
 if __name__ == "__main__":
-    import os
     port = int(os.environ.get("PORT", 5000))
     app.run(debug=False, host="0.0.0.0", port=port)
