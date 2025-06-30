@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -35,6 +34,8 @@
       padding: 10px;
       background-color: #2d2d44;
       border-radius: 8px;
+      display: flex;
+      flex-direction: column;
     }
 
     .message {
@@ -85,20 +86,19 @@
       <div class="message bot">Merhaba! Size nasıl yardımcı olabilirim?</div>
     </div>
     <form id="chatForm">
-      <input type="text" id="userInput" placeholder="Mesajınızı yazın..." required>
+      <input type="text" id="userInput" placeholder="Mesajınızı yazın..." required autocomplete="off">
       <input type="submit" value="Gönder">
     </form>
   </div>
 
   <script>
-    console.log("Sayfa yüklendi");
-
     document.getElementById("chatForm").addEventListener("submit", sendMessage);
 
     function sendMessage(event) {
       event.preventDefault();
       const input = document.getElementById('userInput');
-      const message = input.value;
+      const message = input.value.trim();
+      if (!message) return;
       input.value = '';
 
       addMessage(message, 'user');
@@ -106,7 +106,7 @@
       fetch('/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: message })
+        body: JSON.stringify({ message })
       })
       .then(res => {
         if (!res.ok) throw new Error("Sunucu hatası!");
@@ -116,8 +116,8 @@
         addMessage(data.reply, 'bot');
       })
       .catch(err => {
-        console.error("Hata:", err);
-        addMessage("Bir hata oluştu: " + err.message, 'bot');
+        console.error("İstek Hatası:", err);
+        addMessage("⚠️ Hata oluştu: " + err.message, 'bot');
       });
     }
 
