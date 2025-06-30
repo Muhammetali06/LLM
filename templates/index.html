@@ -94,30 +94,32 @@
       document.getElementById("chatForm").addEventListener("submit", sendMessage);
 
       function sendMessage(event) {
-        event.preventDefault();
-        const input = document.getElementById('userInput');
-        const message = input.value.trim();
-        if (!message) return;
-        input.value = '';
-        addMessage(message, 'user');
+  event.preventDefault();
+  const input = document.getElementById('userInput');
+  const message = input.value;
+  input.value = '';
 
-        fetch('/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: message })
-        })
-        .then(res => {
-          if (!res.ok) throw new Error("Sunucu hatası!");
-          return res.json();
-        })
-        .then(data => {
-          addMessage(data.reply, 'bot');
-        })
-        .catch(err => {
-          console.error("Hata:", err);
-          addMessage("Bir hata oluştu: " + err.message, 'bot');
-        });
-      }
+  addMessage(message, 'user');
+
+  fetch('/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: message })
+  })
+  .then(res => {
+    if (!res.ok) throw new Error("Sunucu hatası!");
+    return res.json();
+  })
+  .then(data => {
+    console.log("Bot cevabı:", data);  // 👈 BURAYI EKLEDİK
+    addMessage(data.reply, 'bot');
+  })
+  .catch(err => {
+    console.error("Hata:", err);
+    addMessage("Bir hata oluştu: " + err.message, 'bot');
+  });
+}
+
 
       function addMessage(text, sender) {
         const chatbox = document.getElementById('chatbox');
