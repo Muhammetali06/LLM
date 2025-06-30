@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ChatGPT Benzeri Chatbot</title>
   <style>
     body {
@@ -34,8 +34,6 @@
       padding: 10px;
       background-color: #2d2d44;
       border-radius: 8px;
-      display: flex;
-      flex-direction: column;
     }
 
     .message {
@@ -86,49 +84,50 @@
       <div class="message bot">Merhaba! Size nasıl yardımcı olabilirim?</div>
     </div>
     <form id="chatForm">
-      <input type="text" id="userInput" placeholder="Mesajınızı yazın..." required autocomplete="off">
-      <input type="submit" value="Gönder">
+      <input type="text" id="userInput" placeholder="Mesajınızı yazın..." required />
+      <input type="submit" value="Gönder" />
     </form>
   </div>
 
   <script>
-    document.getElementById("chatForm").addEventListener("submit", sendMessage);
+    document.addEventListener("DOMContentLoaded", function () {
+      document.getElementById("chatForm").addEventListener("submit", sendMessage);
 
-    function sendMessage(event) {
-      event.preventDefault();
-      const input = document.getElementById('userInput');
-      const message = input.value.trim();
-      if (!message) return;
-      input.value = '';
+      function sendMessage(event) {
+        event.preventDefault();
+        const input = document.getElementById('userInput');
+        const message = input.value.trim();
+        if (!message) return;
+        input.value = '';
+        addMessage(message, 'user');
 
-      addMessage(message, 'user');
+        fetch('/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: message })
+        })
+        .then(res => {
+          if (!res.ok) throw new Error("Sunucu hatası!");
+          return res.json();
+        })
+        .then(data => {
+          addMessage(data.reply, 'bot');
+        })
+        .catch(err => {
+          console.error("Hata:", err);
+          addMessage("Bir hata oluştu: " + err.message, 'bot');
+        });
+      }
 
-      fetch('/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message })
-      })
-      .then(res => {
-        if (!res.ok) throw new Error("Sunucu hatası!");
-        return res.json();
-      })
-      .then(data => {
-        addMessage(data.reply, 'bot');
-      })
-      .catch(err => {
-        console.error("İstek Hatası:", err);
-        addMessage("⚠️ Hata oluştu: " + err.message, 'bot');
-      });
-    }
-
-    function addMessage(text, sender) {
-      const chatbox = document.getElementById('chatbox');
-      const msgDiv = document.createElement('div');
-      msgDiv.className = 'message ' + sender;
-      msgDiv.textContent = text;
-      chatbox.appendChild(msgDiv);
-      chatbox.scrollTop = chatbox.scrollHeight;
-    }
+      function addMessage(text, sender) {
+        const chatbox = document.getElementById('chatbox');
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'message ' + sender;
+        msgDiv.textContent = text;
+        chatbox.appendChild(msgDiv);
+        chatbox.scrollTop = chatbox.scrollHeight;
+      }
+    });
   </script>
 </body>
 </html>
