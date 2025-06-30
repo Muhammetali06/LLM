@@ -41,7 +41,7 @@ def speak(text):
 def openai_response(prompt):
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-4o-mini",
+           model="gpt-4o",
             messages=[
                 {"role": "system", "content": "Türkçe olarak kısa ve anlaşılır cevaplar ver."},
                 {"role": "user", "content": prompt}
