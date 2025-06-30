@@ -44,22 +44,23 @@ def check_custom_commands(voice):
 
 def openai_response(prompt):
     try:
-        print("API Key:", openai.api_key[:10])  # ilk 10 karakter
+        print("API Key'in ilk kısmı:", openai.api_key[:10])
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",  # emin olmak için önce bu modelle dene
+            model="gpt-3.5-turbo",  # önce bu modelle deneyelim
             messages=[
-                {"role": "system", "content": "Türkçe olarak kısa ve anlaşılır cevaplar ver."},
+                {"role": "system", "content": "Türkçe ve kısa yanıt ver."},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=150,
+            max_tokens=100,
             temperature=0.7,
         )
         answer = response['choices'][0]['message']['content'].strip()
-        print("OpenAI cevabı:", answer)
+        print("OpenAI'den gelen cevap:", answer)
         return answer
     except Exception as e:
         import traceback
-        print("OpenAI API Hatası:", e)
+        print(">>> OpenAI API HATASI <<<")
+        print("Hata mesajı:", str(e))
         traceback.print_exc()
         return "Üzgünüm, şu anda cevap veremiyorum."
 
