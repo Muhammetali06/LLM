@@ -2,7 +2,7 @@
 from flask import Flask, render_template, request, jsonify
 import openai
 from gtts import gTTS
-from pydub import AudioSegment 
+from pydub import AudioSegment
 import os
 from datetime import datetime
 import random
@@ -34,7 +34,6 @@ def speak(text):
     tts.save(file)
     speeding()
     os.system("start audio-4065.mp3")  # Windows için
-    # Linux/Mac için: os.system("afplay audio-4065.mp3") veya benzeri
     os.remove(file)
     os.remove("audio-4065.mp3")
 
@@ -80,10 +79,6 @@ def check_custom_commands(voice):
         saat = datetime.now().strftime("%H:%M")
         cevaplar = ["Saat şu an: ", "Hemen bakıyorum: "]
         return random.choice(cevaplar) + saat
-    elif "google'da ara" in voice:
-        return "Bu özellik web tarayıcıda çalışmaz."
-    elif "uygulama aç" in voice:
-        return "Uygulama açma özelliği bu ortamda devre dışı."
     else:
         return None
 
@@ -102,10 +97,6 @@ def chat():
     return jsonify({"reply": response})
 
 if __name__ == "__main__":
-    app.run(debug=True)
-if __name__ == "__main__":
     import os
     port = int(os.environ.get("PORT", 5000))
     app.run(debug=False, host="0.0.0.0", port=port)
-
-    
