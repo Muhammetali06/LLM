@@ -2,3 +2,4 @@ flask
 openai
 gtts
 pydub
+flask_cors
