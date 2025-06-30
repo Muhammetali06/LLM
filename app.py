@@ -1,4 +1,3 @@
-# app.py (Flask + OpenAI + Sesli Chatbot)
 from flask import Flask, render_template, request, jsonify
 import openai
 from gtts import gTTS
@@ -6,15 +5,12 @@ from pydub import AudioSegment
 import os
 from datetime import datetime
 import random
-import webbrowser
 
-# OpenAI API anahtarını ortam değişkeninden al
-openai.api_key = os.environ.get("OPENAI_API_KEY")
-print("OPENAI API KEY:", openai.api_key)
+# OpenAI API anahtarını environment'tan al
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 app = Flask(__name__)
 
-# Ses dosyasını hızlandır (isteğe bağlı)
 def speed_swifter(sound, speed=1.0):
     sound_with_altered_frame_rate = sound._spawn(
         sound.raw_data,
@@ -41,7 +37,7 @@ def speak(text):
 def openai_response(prompt):
     try:
         response = openai.ChatCompletion.create(
-           model="gpt-4o",
+            model="gpt-4o",
             messages=[
                 {"role": "system", "content": "Türkçe olarak kısa ve anlaşılır cevaplar ver."},
                 {"role": "user", "content": prompt}
@@ -94,7 +90,7 @@ def chat():
     response = check_custom_commands(message)
     if response is None:
         response = openai_response(message)
-    speak(response)
+    # speak(response)  # Render ortamında ses çalmak istemiyorsan kapalı bırak
     return jsonify({"reply": response})
 
 if __name__ == "__main__":
