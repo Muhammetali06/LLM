@@ -44,18 +44,25 @@ def check_custom_commands(voice):
 
 def openai_response(prompt):
     try:
+        print("API Key:", openai.api_key[:10])  # ilk 10 karakter
         response = openai.ChatCompletion.create(
-            model="gpt-4o",  # veya "gpt-3.5-turbo"
+            model="gpt-3.5-turbo",  # emin olmak için önce bu modelle dene
             messages=[
                 {"role": "system", "content": "Türkçe olarak kısa ve anlaşılır cevaplar ver."},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=150
+            max_tokens=150,
+            temperature=0.7,
         )
-        return response['choices'][0]['message']['content'].strip()
+        answer = response['choices'][0]['message']['content'].strip()
+        print("OpenAI cevabı:", answer)
+        return answer
     except Exception as e:
-        print("API hatası:", e)
+        import traceback
+        print("OpenAI API Hatası:", e)
+        traceback.print_exc()
         return "Üzgünüm, şu anda cevap veremiyorum."
+
 
 # Anasayfa
 @app.route("/")
