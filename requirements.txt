@@ -4,4 +4,6 @@ gtts
 pydub
 flask_cors 
 cohere==4.50.0
+flask-cors
+pytz
 
