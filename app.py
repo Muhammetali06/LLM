@@ -1,17 +1,15 @@
-# app.py (Render uyumlu, ses çalma olmadan, CORS dahil)
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
-import openai
 from datetime import datetime
 import random
 import os
+import cohere  # cohere eklendi
 
-openai.api_key = os.getenv("OPENAI_API_KEY", "sk-...")  # Render'da gizli key kullan
+cohere_api_key = os.getenv("COHERE_API_KEY", "your-default-key")  # Render gizli anahtar
+co = cohere.Client(cohere_api_key)
 
 app = Flask(__name__)
 CORS(app)
-
-# Mesajlara özel komutlar
 
 def check_custom_commands(voice):
     if "merhaba" in voice:
@@ -40,45 +38,36 @@ def check_custom_commands(voice):
     else:
         return None
 
-# OpenAI'dan cevap alma fonksiyonu
-
-def openai_response(prompt):
+# COHERE'den cevap alma
+def cohere_response(prompt):
     try:
-        print("API Key'in ilk kısmı:", openai.api_key[:10])
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",  # önce bu modelle deneyelim
-            messages=[
-                {"role": "system", "content": "Türkçe ve kısa yanıt ver."},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=100,
+        response = co.chat(
+            message=prompt,
+            model="command-r-plus",  # Ücretsiz model
             temperature=0.7,
+            max_tokens=100
         )
-        answer = response['choices'][0]['message']['content'].strip()
-        print("OpenAI'den gelen cevap:", answer)
+        answer = response.text.strip()
+        print("Cohere'den gelen cevap:", answer)
         return answer
     except Exception as e:
         import traceback
-        print(">>> OpenAI API HATASI <<<")
-        print("Hata mesajı:", str(e))
+        print(">>> Cohere API HATASI <<<")
+        print("Hata:", str(e))
         traceback.print_exc()
-        return "Üzgünüm, şu anda cevap veremiyorum."
+        return "Şu anda cevap veremiyorum, sonra tekrar dene."
 
-
-# Anasayfa
 @app.route("/")
 def index():
     return render_template("index.html")
 
-# Chat endpoint
 @app.route("/chat", methods=["POST"])
 def chat():
     data = request.get_json()
     message = data.get("message", "")
     response = check_custom_commands(message)
     if response is None:
-        response = openai_response(message)
-    print("Cevap:", response)  # DEBUG
+        response = cohere_response(message)
     return jsonify({"reply": response})
 
 if __name__ == "__main__":
