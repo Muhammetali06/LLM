@@ -48,7 +48,7 @@ def cohere_response(prompt):
             message=prompt,
             model="command-r-plus",
             temperature=0.7,
-            max_tokens=100
+            max_tokens=1000
         )
         answer = response.text.strip()
         print("Cohere'den gelen cevap:", answer)
