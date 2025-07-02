@@ -2,4 +2,6 @@ flask
 openai==0.28.1
 gtts
 pydub
-flask_cors
+flask_cors 
+cohere==4.50.0
+
